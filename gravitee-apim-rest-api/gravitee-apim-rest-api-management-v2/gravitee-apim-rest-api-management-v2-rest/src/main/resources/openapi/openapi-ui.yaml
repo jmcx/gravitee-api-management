@@ -246,6 +246,134 @@ paths:
                 default:
                     $ref: "#/components/responses/Error"
 
+    /ui/forms:
+        get:
+            tags:
+                - Management UI
+            summary: List Portal Next forms
+            description: |
+                List all Portal Next forms configured for the given environment.
+                User must have the ENVIRONMENT_SETTINGS[READ] permission.
+            operationId: listPortalNextForms
+            responses:
+                "200":
+                    description: The list of forms
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PortalNextFormsResponse"
+                default:
+                    $ref: "#/components/responses/Error"
+        post:
+            tags:
+                - Management UI
+            summary: Create a Portal Next form
+            description: |
+                Create a new Portal Next form for the given environment.
+                User must have the ENVIRONMENT_SETTINGS[UPDATE] permission.
+            operationId: createPortalNextForm
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/CreatePortalNextForm"
+            responses:
+                "201":
+                    description: The created form
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PortalNextForm"
+                default:
+                    $ref: "#/components/responses/Error"
+
+    /ui/forms/{formId}:
+        parameters:
+            - name: formId
+              in: path
+              required: true
+              schema:
+                  type: string
+        get:
+            tags:
+                - Management UI
+            summary: Get a Portal Next form
+            description: |
+                Get a Portal Next form by id.
+                User must have the ENVIRONMENT_SETTINGS[READ] permission.
+            operationId: getPortalNextForm
+            responses:
+                "200":
+                    description: The form
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PortalNextForm"
+                default:
+                    $ref: "#/components/responses/Error"
+        put:
+            tags:
+                - Management UI
+            summary: Update a Portal Next form
+            description: |
+                Update a Portal Next form by id.
+                User must have the ENVIRONMENT_SETTINGS[UPDATE] permission.
+            operationId: updatePortalNextForm
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UpdatePortalNextForm"
+            responses:
+                "200":
+                    description: The updated form
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PortalNextForm"
+                default:
+                    $ref: "#/components/responses/Error"
+        delete:
+            tags:
+                - Management UI
+            summary: Delete a Portal Next form
+            description: |
+                Delete a Portal Next form by id.
+                User must have the ENVIRONMENT_SETTINGS[UPDATE] permission.
+            operationId: deletePortalNextForm
+            responses:
+                "204":
+                    description: Deleted
+                default:
+                    $ref: "#/components/responses/Error"
+
+    /ui/forms/{formId}/_activate:
+        parameters:
+            - name: formId
+              in: path
+              required: true
+              schema:
+                  type: string
+        post:
+            tags:
+                - Management UI
+            summary: Activate a Portal Next form
+            description: |
+                Set the given form as the active one for the environment.
+                User must have the ENVIRONMENT_SETTINGS[UPDATE] permission.
+            operationId: activatePortalNextForm
+            responses:
+                "200":
+                    description: The activated form
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PortalNextForm"
+                default:
+                    $ref: "#/components/responses/Error"
+
     /ui/portal-menu-links/{portalMenuLinkId}:
         parameters:
             - $ref: "#/components/parameters/portalMenuLinkIdParam"
@@ -369,6 +497,77 @@ components:
             required:
                 - name
                 - type
+
+        CreatePortalNextForm:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Display name of the form
+                description:
+                    type: string
+                    description: Optional description of the form
+                schema:
+                    type: string
+                    description: JSON schema as raw string
+            required:
+                - name
+                - schema
+
+        UpdatePortalNextForm:
+            type: object
+            properties:
+                name:
+                    type: string
+                    description: Display name of the form
+                description:
+                    type: string
+                    description: Optional description of the form
+                schema:
+                    type: string
+                    description: JSON schema as raw string
+            required:
+                - name
+                - schema
+
+        PortalNextForm:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: Unique id of the form
+                name:
+                    type: string
+                    description: Display name of the form
+                description:
+                    type: string
+                    description: Optional description of the form
+                schema:
+                    type: string
+                    description: JSON schema as raw string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                active:
+                    type: boolean
+                    description: Whether this form is the active one for the environment
+            required:
+                - id
+                - name
+                - schema
+
+        PortalNextFormsResponse:
+            type: object
+            properties:
+                data:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/PortalNextForm"
+            required:
+                - data
 
         CtaConfiguration:
             type: object

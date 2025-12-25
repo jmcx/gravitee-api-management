@@ -15,7 +15,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map, tap, throwError } from 'rxjs';
 
 import { ConfigService } from './config.service';
 import { CreateSubscription, Subscription, SubscriptionStatusEnum, UpdateSubscription } from '../entities/subscription/subscription';
@@ -54,7 +54,15 @@ export class SubscriptionService {
   }
 
   subscribe(createSubscription: CreateSubscription): Observable<Subscription> {
-    return this.http.post<Subscription>(`${this.configService.baseURL}/subscriptions`, createSubscription);
+    const url = `${this.configService.baseURL}/subscriptions`;
+    return this.http.post<Subscription>(url, createSubscription, { observe: 'response' }).pipe(
+      tap(res => {
+      }),
+      map(res => res.body as Subscription),
+      catchError(err => {
+        return throwError(() => err);
+      }),
+    );
   }
 
   update(subscriptionId: string, updatedSubscription: UpdateSubscription) {

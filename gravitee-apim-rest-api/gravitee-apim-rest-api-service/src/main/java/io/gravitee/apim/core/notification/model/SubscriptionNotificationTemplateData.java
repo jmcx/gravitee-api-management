@@ -15,6 +15,7 @@
  */
 package io.gravitee.apim.core.notification.model;
 
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,4 +29,5 @@ public class SubscriptionNotificationTemplateData {
     private String request;
     private String reason;
     private String status;
+    private Map<String, String> metadata;
 }

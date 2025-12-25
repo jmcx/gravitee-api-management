@@ -130,6 +130,9 @@ import io.gravitee.rest.api.service.v4.ApiTemplateService;
 import io.gravitee.rest.api.service.v4.PlanSearchService;
 import io.gravitee.rest.api.service.v4.validation.SubscriptionValidationService;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -548,7 +551,11 @@ public class SubscriptionServiceImpl extends AbstractService implements Subscrip
                 subscription.setType(Subscription.Type.STANDARD);
             }
 
-            subscription = subscriptionRepository.create(subscription);
+            try {
+                subscription = subscriptionRepository.create(subscription);
+            } catch (RuntimeException e) {
+                throw e;
+            }
 
             createAudit(executionContext, apiId, application, SUBSCRIPTION_CREATED, subscription.getCreatedAt(), null, subscription);
 

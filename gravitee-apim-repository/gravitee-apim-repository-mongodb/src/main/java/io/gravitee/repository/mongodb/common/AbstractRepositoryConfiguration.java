@@ -34,8 +34,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.data.annotation.Persistent;
 import org.springframework.data.convert.PropertyValueConverterFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -105,5 +108,21 @@ public abstract class AbstractRepositoryConfiguration extends AbstractMongoClien
     @Override
     protected void configureConverters(MongoCustomConversions.MongoConverterConfigurationAdapter adapter) {
         adapter.registerPropertyValueConverterFactory(PropertyValueConverterFactory.beanFactoryAware(applicationContext));
+    }
+
+    @Override
+    public MappingMongoConverter mappingMongoConverter(
+        MongoDatabaseFactory databaseFactory,
+        MongoCustomConversions customConversions,
+        MongoMappingContext mappingContext
+    ) {
+        final MappingMongoConverter converter = super.mappingMongoConverter(databaseFactory, customConversions, mappingContext);
+        // Allow Map<String, ?> keys to contain dots ('.') by escaping them when writing to Mongo.
+        // This is required for subscription metadata keys like "forms.id" or "forms.answer.*".
+        final String replacement = environment.getProperty("management.mongodb.mapKeyDotReplacement", "__dot__");
+        if (replacement != null && !replacement.isBlank()) {
+            converter.setMapKeyDotReplacement(replacement);
+        }
+        return converter;
     }
 }

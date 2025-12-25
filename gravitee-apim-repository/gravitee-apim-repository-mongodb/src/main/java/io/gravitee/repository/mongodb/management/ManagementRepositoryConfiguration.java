@@ -33,10 +33,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoOperations;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 /**
@@ -79,9 +81,9 @@ public class ManagementRepositoryConfiguration extends AbstractRepositoryConfigu
 
     @Primary
     @Bean(name = "managementMongoTemplate")
-    public MongoOperations mongoOperations(MongoClient mongo) {
+    public MongoOperations mongoOperations(MongoDatabaseFactory databaseFactory, MappingMongoConverter converter) {
         try {
-            return new MongoTemplate(mongo, getDatabaseName());
+            return new MongoTemplate(databaseFactory, converter);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

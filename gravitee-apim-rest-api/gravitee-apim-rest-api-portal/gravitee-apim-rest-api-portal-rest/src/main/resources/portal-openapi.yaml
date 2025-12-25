@@ -2749,6 +2749,29 @@ paths:
                                 $ref: "#/components/schemas/ErrorResponse"
                 500:
                     $ref: "#/components/responses/InternalServerError"
+    /forms/active:
+        get:
+            tags:
+                - Portal
+            summary: Get active subscription form schema.
+            operationId: getActiveSubscriptionForm
+            description: |
+                Get the active Portal Next form schema used during subscription checkout for the current environment.
+            security:
+                - {}
+                - BasicAuth: []
+                - CookieAuth: []
+            responses:
+                200:
+                    description: Active form
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/PortalNextForm"
+                204:
+                    description: No active form configured
+                500:
+                    $ref: "#/components/responses/InternalServerError"
     /configuration:
         get:
             tags:
@@ -3807,6 +3830,36 @@ components:
                     type: array
                     items:
                         $ref: "#/components/schemas/Error"
+
+        PortalNextForm:
+            type: object
+            description: Active Portal Next subscription form schema
+            properties:
+                id:
+                    type: string
+                    description: Unique id of the form
+                name:
+                    type: string
+                    description: Display name of the form
+                description:
+                    type: string
+                    description: Optional description of the form
+                schema:
+                    type: string
+                    description: JSON schema as raw string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                active:
+                    type: boolean
+                    description: Whether this form is active for the environment
+            required:
+                - id
+                - name
+                - schema
 
         ApisResponse:
             properties:

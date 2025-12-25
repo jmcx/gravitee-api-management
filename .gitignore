@@ -37,6 +37,7 @@ docker/quick-setup/**/.certificates
 docker/quick-setup/**/.plugins
 docker/quick-setup/**/.license
 docker/quick-setup/**/.driver
+docker/quick-setup/**/docker-compose.override.yml
 
 # used by helm charts
 helm/**/*.tgz
@@ -62,3 +63,5 @@ gravitee-apim-e2e/ui-test/screenshots/
 
 # Exclude flattened version of the pom, for details see https://maven.apache.org/maven-ci-friendly.html#install-deploy
 .flattened-pom.xml
+/.m2repo
+/.cursor

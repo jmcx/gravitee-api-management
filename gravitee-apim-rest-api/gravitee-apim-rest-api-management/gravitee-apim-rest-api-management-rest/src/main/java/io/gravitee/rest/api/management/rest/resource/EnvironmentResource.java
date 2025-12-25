@@ -197,7 +197,7 @@ public class EnvironmentResource extends AbstractResource {
 
     @Path("audit")
     public AuditResource getAuditResource() {
-        return resourceContext.getResource(AuditResource.class);
+        throw new jakarta.ws.rs.NotFoundException();
     }
 
     @Path("portal")

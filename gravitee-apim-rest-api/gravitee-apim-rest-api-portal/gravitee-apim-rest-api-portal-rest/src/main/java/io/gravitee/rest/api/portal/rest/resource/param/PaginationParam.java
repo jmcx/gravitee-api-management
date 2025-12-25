@@ -18,17 +18,7 @@ package io.gravitee.rest.api.portal.rest.resource.param;
 import jakarta.validation.constraints.Min;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class PaginationParam {
 
     public static final String PAGE_QUERY_PARAM_NAME = "page";
@@ -46,6 +36,55 @@ public class PaginationParam {
     @QueryParam(SIZE_QUERY_PARAM_NAME)
     @Min(-1)
     Integer size;
+
+    public PaginationParam() {}
+
+    public PaginationParam(Integer page, Integer size) {
+        this.page = page;
+        this.size = size;
+    }
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private Integer page;
+        private Integer size;
+
+        private Builder() {}
+
+        public Builder page(Integer page) {
+            this.page = page;
+            return this;
+        }
+
+        public Builder size(Integer size) {
+            this.size = size;
+            return this;
+        }
+
+        public PaginationParam build() {
+            return new PaginationParam(page, size);
+        }
+    }
 
     public boolean hasPagination() {
         return this.getSize() != null && !this.getSize().equals(-1);

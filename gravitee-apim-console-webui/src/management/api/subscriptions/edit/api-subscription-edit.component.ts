@@ -119,6 +119,9 @@ export class ApiSubscriptionEditComponent implements OnInit {
   displayedColumns: string[];
   hasSharedApiKeyMode: boolean;
   isFederatedApi: boolean;
+  formsMetadataEntries: { key: string; value: string }[] = [];
+  formsMetadataFormName?: string;
+  otherMetadataEntries: { key: string; value: string }[] = [];
   private apiId: string;
   private canUseCustomApiKey: boolean;
 
@@ -188,6 +191,7 @@ export class ApiSubscriptionEditComponent implements OnInit {
               consumerConfiguration: subscription.consumerConfiguration,
               metadata: subscription.metadata,
             };
+            this.applyFormsMetadataPreview(subscription.metadata);
 
             this.canUseCustomApiKey =
               this.subscription.plan.securityType === 'API_KEY' && this.constants.env?.settings?.plan?.security?.customApiKey?.enabled;
@@ -211,6 +215,42 @@ export class ApiSubscriptionEditComponent implements OnInit {
       });
   }
 
+  private applyFormsMetadataPreview(metadata?: { [key: string]: string }) {
+    const allEntries = Object.entries(metadata ?? {});
+
+    this.formsMetadataFormName = metadata?.['forms.name'] ?? metadata?.['forms.id'];
+
+    this.formsMetadataEntries = allEntries
+      .filter(([key]) => key.startsWith('forms.answer.'))
+      .map(([key, value]) => ({ key: key.replace('forms.answer.', ''), value: this.prettyPrintMaybeJson(value) }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+
+    this.otherMetadataEntries = allEntries
+      .filter(([key]) => !key.startsWith('forms.answer.') && key !== 'forms.name' && key !== 'forms.id')
+      .map(([key, value]) => ({ key, value: this.prettyPrintMaybeJson(value) }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+  }
+
+  private prettyPrintMaybeJson(value: string): string {
+    if (value == null) {
+      return '';
+    }
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return '';
+    }
+    // quick heuristic: attempt to parse JSON values we stored as stringified arrays/objects/booleans/numbers
+    if (trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed === 'true' || trimmed === 'false' || /^-?\\d+(\\.\\d+)?$/.test(trimmed)) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        return typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  }
+
   validateSubscription() {
     this.matDialog
       .open<ApiPortalSubscriptionValidateDialogComponent, ApiPortalSubscriptionAcceptDialogData, ApiPortalSubscriptionAcceptDialogResult>(
@@ -232,12 +272,30 @@ export class ApiSubscriptionEditComponent implements OnInit {
       .pipe(
         switchMap((result) =>
           result
-            ? this.apiSubscriptionService.accept(this.subscription.id, this.apiId, {
-                ...(result.customApiKey && result.customApiKey !== '' ? { customApiKey: result.customApiKey } : {}),
-                ...(result.message && result.message !== '' ? { reason: result.message } : {}),
-                ...(result.start ? { startingAt: result.start } : {}),
-                ...(result.end ? { endingAt: result.end } : {}),
-              })
+            ? (() => {
+                // Preserve metadata before accept. Runtime evidence shows metadata can become empty after ACCEPTED.
+                const metadataToRestore = this.subscription?.metadata;
+
+                return this.apiSubscriptionService
+                  .accept(this.subscription.id, this.apiId, {
+                    ...(result.customApiKey && result.customApiKey !== '' ? { customApiKey: result.customApiKey } : {}),
+                    ...(result.message && result.message !== '' ? { reason: result.message } : {}),
+                    ...(result.start ? { startingAt: result.start } : {}),
+                    ...(result.end ? { endingAt: result.end } : {}),
+                  })
+                  .pipe(
+                    switchMap((acceptedSubscription) => {
+                      const hasMetadataToRestore = Object.keys(metadataToRestore ?? {}).length > 0;
+                      if (!hasMetadataToRestore) {
+                        return EMPTY;
+                      }
+
+                      return this.apiSubscriptionService.update(this.apiId, this.subscription.id, {
+                        metadata: metadataToRestore,
+                      });
+                    }),
+                  );
+              })()
             : EMPTY,
         ),
         takeUntil(this.unsubscribe$),

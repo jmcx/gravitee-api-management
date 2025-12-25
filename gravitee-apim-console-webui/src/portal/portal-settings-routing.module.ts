@@ -26,6 +26,7 @@ import { CategoryListComponent } from './catalog/category-list/category-list.com
 import { PortalApiComponent } from './api/portal-api.component';
 import { PortalApiListComponent } from './api/api-list/portal-api-list.component';
 import { HomepageComponent } from './homepage/homepage.component';
+import { PortalFormsComponent } from './forms/portal-forms.component';
 
 import { PermissionGuard } from '../shared/components/gio-permission/gio-permission.guard';
 import { HasLicenseGuard } from '../shared/components/gio-license/has-license.guard';
@@ -119,6 +120,15 @@ const portalRoutes: Routes = [
         data: {
           permissions: {
             anyOf: ['environment-documentation-r', 'environment-documentation-u'],
+          },
+        },
+      },
+      {
+        path: 'forms',
+        component: PortalFormsComponent,
+        data: {
+          permissions: {
+            anyOf: ['environment-settings-r', 'environment-settings-u'],
           },
         },
       },

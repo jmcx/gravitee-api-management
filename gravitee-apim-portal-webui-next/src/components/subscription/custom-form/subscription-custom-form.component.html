@@ -1,0 +1,52 @@
+<mat-card appearance="outlined">
+  <mat-card-content>
+    <div class="m3-title-medium" i18n="@@subscribeToApiCustomFormTitle">Additional information</div>
+    <div class="m3-body-medium" i18n="@@subscribeToApiCustomFormSubtitle">
+      Please fill out the following information required by the API publisher.
+    </div>
+
+    @if (parseError) {
+      <div class="subscription-custom-form__error m3-body-medium">
+        {{ parseError }}
+      </div>
+    } @else {
+      <form [formGroup]="form" class="subscription-custom-form__fields">
+        @for (field of fields; track field.key) {
+          @if (field.kind === 'string' && field.enum?.length) {
+            <mat-form-field appearance="outline">
+              <mat-label>{{ field.title }}</mat-label>
+              <mat-select [formControlName]="field.key" [required]="field.required">
+                @for (opt of field.enum; track opt.value) {
+                  <mat-option [value]="opt.value">{{ opt.title }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          } @else if (field.kind === 'string') {
+            <mat-form-field appearance="outline">
+              <mat-label>{{ field.title }}</mat-label>
+              <input matInput [formControlName]="field.key" />
+            </mat-form-field>
+          } @else if (field.kind === 'number') {
+            <mat-form-field appearance="outline">
+              <mat-label>{{ field.title }}</mat-label>
+              <input matInput type="number" [formControlName]="field.key" />
+            </mat-form-field>
+          } @else if (field.kind === 'boolean') {
+            <mat-checkbox [formControlName]="field.key">{{ field.title }}</mat-checkbox>
+          } @else if (field.kind === 'multiEnum') {
+            <mat-form-field appearance="outline">
+              <mat-label>{{ field.title }}</mat-label>
+              <mat-select [formControlName]="field.key" multiple [required]="field.required">
+                @for (opt of field.options; track opt.value) {
+                  <mat-option [value]="opt.value">{{ opt.title }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+        }
+      </form>
+    }
+  </mat-card-content>
+</mat-card>
+
+

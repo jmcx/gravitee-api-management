@@ -45,6 +45,9 @@ https-gateway: ## Run API Management with HTTPS enabled.
 mongodb: ## Run API Management with MongoDB as database.
 	cd ./quick-setup/mongodb && docker-compose down -v && docker-compose pull && docker-compose up -d
 
+local-management-api: ## Build Management API from local sources and restart only `management_api` in quick-setup/mongodb (single action wrapper around LOCAL_DEV_MANAGEMENT_API.md steps 1-5).
+	bash ./quick-setup/mongodb/local-management-api.sh
+
 postgresql: ## Run API Management with PostgreSQL as database.
 	cd ./quick-setup/postgresql && docker-compose down -v && docker-compose pull && docker-compose up -d
 

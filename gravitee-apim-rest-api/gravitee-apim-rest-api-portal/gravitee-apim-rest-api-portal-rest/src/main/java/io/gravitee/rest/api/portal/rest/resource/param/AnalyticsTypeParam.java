@@ -16,14 +16,16 @@
 package io.gravitee.rest.api.portal.rest.resource.param;
 
 import jakarta.ws.rs.WebApplicationException;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author David BRASSELY (david.brassely at graviteesource.com)
  * @author GraviteeSource Team
  */
-@Slf4j
 public class AnalyticsTypeParam extends AbstractParam<AnalyticsTypeParam.AnalyticsType> {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalyticsTypeParam.class);
 
     public enum AnalyticsType {
         GROUP_BY,

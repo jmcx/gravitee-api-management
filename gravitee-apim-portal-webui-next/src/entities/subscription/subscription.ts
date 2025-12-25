@@ -67,6 +67,7 @@ export interface CreateSubscription {
     pageId?: string;
     revision?: number;
   };
+  metadata?: Record<string, string>;
   plan: string;
   request?: string;
   configuration?: SubscriptionConsumerConfiguration;

@@ -1,0 +1,68 @@
+@use '../../scss/gio-layout' as gio-layout;
+
+:host {
+  @include gio-layout.gio-responsive-content-container;
+}
+
+.portal-forms {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.portal-forms__content {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.portal-forms__list__actions {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.portal-forms__list__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.portal-forms__list__item__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.portal-forms__list__item__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.portal-forms__list__item--active {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.portal-forms__editor__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.portal-forms__editor__form mat-form-field {
+  width: 100%;
+}
+
+.portal-forms__editor__error {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #b00020;
+}
+
+

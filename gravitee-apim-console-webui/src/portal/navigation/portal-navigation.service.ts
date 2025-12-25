@@ -74,6 +74,12 @@ export class PortalNavigationService {
       icon: 'gio:box',
       permissions: ['environment-documentation-r', 'environment-documentation-u'],
     },
+    {
+      displayName: 'Forms',
+      routerLink: 'forms',
+      icon: 'gio:edit',
+      permissions: ['environment-settings-r', 'environment-settings-u'],
+    },
   ];
 
   public getMainMenuItems(): MenuItem[] {

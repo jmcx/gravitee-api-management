@@ -28,6 +28,7 @@ import io.gravitee.rest.api.service.notification.Hook;
 import io.gravitee.rest.api.service.notifiers.WebNotifierService;
 import io.gravitee.rest.api.service.notifiers.WebhookNotifierService;
 import io.vertx.core.json.JsonObject;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -181,10 +182,33 @@ public class WebhookNotifierServiceImpl implements WebhookNotifierService {
             SubscriptionEntity subscription = (SubscriptionEntity) object;
             jsonObject.put("id", subscription.getId());
             jsonObject.put("status", subscription.getStatus());
+            addSubscriptionMetadata(jsonObject, subscription.getMetadata());
         } else if (dataType == SubscriptionNotificationTemplateData.class) {
             SubscriptionNotificationTemplateData notificationData = (SubscriptionNotificationTemplateData) object;
             jsonObject.put("id", notificationData.getId());
             jsonObject.put("status", notificationData.getStatus());
+            addSubscriptionMetadata(jsonObject, notificationData.getMetadata());
+        }
+    }
+
+    private void addSubscriptionMetadata(JsonObject subscriptionJson, Map<String, String> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+
+        // Preserve ordering when possible to keep payloads stable (and testable).
+        JsonObject metadataJson = new JsonObject(new LinkedHashMap<>(metadata));
+        subscriptionJson.put("metadata", metadataJson);
+
+        JsonObject formsJson = new JsonObject();
+        for (Map.Entry<String, String> entry : metadata.entrySet()) {
+            String key = entry.getKey();
+            if (key != null && key.startsWith("forms.")) {
+                formsJson.put(key.substring("forms.".length()), entry.getValue());
+            }
+        }
+        if (!formsJson.isEmpty()) {
+            subscriptionJson.put("forms", formsJson);
         }
     }
 }

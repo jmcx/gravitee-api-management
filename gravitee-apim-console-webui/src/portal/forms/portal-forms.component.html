@@ -1,0 +1,103 @@
+<div class="portal-forms">
+  <portal-header title="Forms">
+    <new-portal-badge></new-portal-badge>
+  </portal-header>
+
+  <div class="portal-forms__content">
+    <mat-card class="portal-forms__list">
+      <mat-card-header>
+        <mat-card-title>Forms</mat-card-title>
+        <mat-card-subtitle>Manage subscription forms for Portal Next</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="portal-forms__list__actions">
+          <button mat-stroked-button color="primary" (click)="newForm()" [disabled]="isReadOnly">
+            <mat-icon svgIcon="gio:plus"></mat-icon>
+            New form
+          </button>
+        </div>
+
+        <mat-nav-list>
+          <a
+            mat-list-item
+            *ngFor="let f of forms()"
+            (click)="selectForm(f.id)"
+            [class.portal-forms__list__item--active]="selectedFormId() === f.id"
+          >
+            <div class="portal-forms__list__item">
+              <div class="portal-forms__list__item__title">
+                <span>{{ f.name }}</span>
+                <span *ngIf="f.active" class="gio-badge-neutral">Active</span>
+              </div>
+              <div class="portal-forms__list__item__actions">
+                <button
+                  mat-icon-button
+                  (click)="$event.stopPropagation(); activate(f.id)"
+                  [disabled]="isReadOnly || f.active"
+                  matTooltip="Set as active"
+                >
+                  <mat-icon svgIcon="gio:check-circled-outline"></mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  (click)="$event.stopPropagation(); delete(f.id)"
+                  [disabled]="isReadOnly"
+                  matTooltip="Delete"
+                >
+                  <mat-icon svgIcon="gio:trash"></mat-icon>
+                </button>
+              </div>
+            </div>
+          </a>
+        </mat-nav-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="portal-forms__editor">
+      <mat-card-header>
+        <mat-card-title>{{ selectedFormId() ? 'Edit form' : 'Create form' }}</mat-card-title>
+        <mat-card-subtitle>JSON schema is validated on save.</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="formGroup" class="portal-forms__editor__form">
+          <div class="portal-forms__editor__row">
+            <mat-form-field appearance="outline">
+              <mat-label>Name</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Description</mat-label>
+              <input matInput formControlName="description" />
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Schema</mat-label>
+            <gio-monaco-editor
+              gioMonacoEditorFormField
+              formControlName="schema"
+              [languageConfig]="{ language: 'json' }"
+              [disableMiniMap]="true"
+              [disableAutoFormat]="false"
+            ></gio-monaco-editor>
+            <mat-hint>Paste or edit your JSON schema. Only a restricted subset is supported.</mat-hint>
+          </mat-form-field>
+
+          <div class="portal-forms__editor__error" *ngIf="schemaJsonError() as err">
+            <mat-icon svgIcon="gio:alert-circle"></mat-icon>
+            <span>{{ err }}</span>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <gio-save-bar
+    *ngIf="!isReadOnly"
+    [opened]="hasUnsavedChanges()"
+    (submitted)="save()"
+    (resetClicked)="selectedFormId() ? selectForm(selectedFormId()!) : newForm()"
+  ></gio-save-bar>
+</div>
+
+

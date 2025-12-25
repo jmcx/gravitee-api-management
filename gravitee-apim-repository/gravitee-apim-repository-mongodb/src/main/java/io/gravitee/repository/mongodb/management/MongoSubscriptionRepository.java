@@ -27,6 +27,7 @@ import io.gravitee.repository.mongodb.management.internal.model.SubscriptionMong
 import io.gravitee.repository.mongodb.management.internal.plan.SubscriptionMongoRepository;
 import io.gravitee.repository.mongodb.management.mapper.GraviteeMapper;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,6 +46,13 @@ import org.springframework.stereotype.Component;
 public class MongoSubscriptionRepository implements SubscriptionRepository {
 
     private final Logger LOGGER = LoggerFactory.getLogger(MongoSubscriptionRepository.class);
+    /**
+     * Spring Data Mongo rejects map keys containing '.' (and keys starting with '$') unless a dot replacement is configured.
+     * We store escaped keys in Mongo and unescape them when returning to the rest of the platform, so external APIs keep using
+     * metadata keys like "forms.id" and "forms.answer.*".
+     */
+    private static final String DOT_REPLACEMENT = "__dot__";
+    private static final String DOLLAR_REPLACEMENT_PREFIX = "__dollar__";
 
     @Autowired
     private GraviteeMapper mapper;
@@ -54,14 +62,13 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 
     @Override
     public Page<Subscription> search(SubscriptionCriteria criteria, Sortable sortable, Pageable pageable) throws TechnicalException {
-        return internalSubscriptionRepository.search(criteria, sortable, pageable).map(mapper::map);
+        return internalSubscriptionRepository.search(criteria, sortable, pageable).map(this::map);
     }
 
     @Override
     public List<Subscription> search(SubscriptionCriteria criteria, Sortable sortable) throws TechnicalException {
         Page<SubscriptionMongo> subscriptionsMongo = internalSubscriptionRepository.search(criteria, sortable, null);
-
-        return mapper.mapSubscriptions(subscriptionsMongo.getContent());
+        return subscriptionsMongo.getContent().stream().map(this::map).collect(Collectors.toList());
     }
 
     @Override
@@ -83,6 +90,7 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
     @Override
     public Subscription create(Subscription subscription) throws TechnicalException {
         SubscriptionMongo subscriptionMongo = mapper.map(subscription);
+        subscriptionMongo.setMetadata(escapeMetadataKeys(subscriptionMongo.getMetadata()));
         subscriptionMongo = internalSubscriptionRepository.insert(subscriptionMongo);
         return map(subscriptionMongo);
     }
@@ -100,6 +108,7 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
         }
 
         subscriptionMongo = mapper.map(subscription);
+        subscriptionMongo.setMetadata(escapeMetadataKeys(subscriptionMongo.getMetadata()));
         subscriptionMongo = internalSubscriptionRepository.save(subscriptionMongo);
         return map(subscriptionMongo);
     }
@@ -142,6 +151,52 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
     }
 
     private Subscription map(SubscriptionMongo subscriptionMongo) {
-        return (subscriptionMongo == null) ? null : mapper.map(subscriptionMongo);
+        if (subscriptionMongo == null) {
+            return null;
+        }
+        Subscription subscription = mapper.map(subscriptionMongo);
+        subscription.setMetadata(unescapeMetadataKeys(subscription.getMetadata()));
+        return subscription;
+    }
+
+    private static java.util.Map<String, String> escapeMetadataKeys(java.util.Map<String, String> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return metadata;
+        }
+        final java.util.Map<String, String> escaped = new HashMap<>(metadata.size());
+        for (var entry : metadata.entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (key == null) {
+                continue;
+            }
+            String outKey = key.replace(".", DOT_REPLACEMENT);
+            if (outKey.startsWith("$")) {
+                outKey = DOLLAR_REPLACEMENT_PREFIX + outKey.substring(1);
+            }
+            escaped.put(outKey, value);
+        }
+        return escaped;
+    }
+
+    private static java.util.Map<String, String> unescapeMetadataKeys(java.util.Map<String, String> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return metadata;
+        }
+        final java.util.Map<String, String> unescaped = new HashMap<>(metadata.size());
+        for (var entry : metadata.entrySet()) {
+            final String key = entry.getKey();
+            final String value = entry.getValue();
+            if (key == null) {
+                continue;
+            }
+            String outKey = key;
+            if (outKey.startsWith(DOLLAR_REPLACEMENT_PREFIX)) {
+                outKey = "$" + outKey.substring(DOLLAR_REPLACEMENT_PREFIX.length());
+            }
+            outKey = outKey.replace(DOT_REPLACEMENT, ".");
+            unescaped.put(outKey, value);
+        }
+        return unescaped;
     }
 }

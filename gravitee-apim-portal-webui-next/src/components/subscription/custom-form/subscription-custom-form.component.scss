@@ -1,0 +1,17 @@
+.subscription-custom-form__fields {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.subscription-custom-form__fields mat-form-field {
+  width: 100%;
+}
+
+.subscription-custom-form__error {
+  margin-top: 12px;
+  color: #b00020;
+}
+
+

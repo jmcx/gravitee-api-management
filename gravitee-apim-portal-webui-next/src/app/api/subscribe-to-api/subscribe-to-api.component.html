@@ -83,7 +83,9 @@
             [message]="message"
             [apiKeyMode]="applicationApiKeyMode"
             [showApiKeyModeSelection]="showApiKeyModeSelection()"
-            [applicationApiKeySubscriptions]="checkoutData.applicationApiKeySubscriptions" />
+            [applicationApiKeySubscriptions]="checkoutData.applicationApiKeySubscriptions"
+            [customFormSchemaJson]="activeForm()?.schema ?? null"
+            (customFormDataChange)="customFormChanges($event)" />
         } @else {
           <app-loader />
         }

@@ -220,6 +220,7 @@ public class OrganizationResource extends AbstractResource {
 
     @Path("audit")
     public AuditResource getAuditResource() {
-        return resourceContext.getResource(AuditResource.class);
+        //return resourceContext.getResource(AuditResource.class);
+        throw new jakarta.ws.rs.NotFoundException();
     }
 }

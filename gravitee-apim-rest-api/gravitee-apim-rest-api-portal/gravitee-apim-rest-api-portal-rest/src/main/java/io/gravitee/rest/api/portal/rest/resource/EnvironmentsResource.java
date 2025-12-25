@@ -106,6 +106,11 @@ public class EnvironmentsResource extends AbstractResource {
         return resourceContext.getResource(ThemeResource.class);
     }
 
+    @Path("forms")
+    public FormsResource getFormsResource() {
+        return resourceContext.getResource(FormsResource.class);
+    }
+
     @Path("tickets")
     public TicketsResource getTicketsResource() {
         return resourceContext.getResource(TicketsResource.class);

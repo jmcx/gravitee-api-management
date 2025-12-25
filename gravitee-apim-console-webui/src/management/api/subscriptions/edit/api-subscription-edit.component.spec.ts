@@ -152,6 +152,48 @@ describe('ApiSubscriptionEditComponent', () => {
       expect(await harness.rejectBtnIsVisible()).toEqual(false);
     });
 
+    it('should display subscription metadata (non-form keys) on subscription details', async () => {
+      await initComponent();
+      expectApiKeyListGet();
+
+      const otherMetadataCard = fixture.nativeElement.querySelector('[data-testId="subscription-other-metadata-card"]');
+      expect(otherMetadataCard).toBeTruthy();
+      expect(otherMetadataCard.textContent).toContain('Subscription metadata');
+      expect(otherMetadataCard.textContent).toContain('key1');
+      expect(otherMetadataCard.textContent).toContain('value1');
+
+      const formsMetadataCard = fixture.nativeElement.querySelector('[data-testId="subscription-forms-metadata-card"]');
+      expect(formsMetadataCard).toBeFalsy();
+    });
+
+    it('should display both form answers and other metadata without duplicates', async () => {
+      const subscription = BASIC_SUBSCRIPTION();
+      subscription.metadata = {
+        'forms.name': 'My subscription form',
+        'forms.answer.question1': 'hello',
+        foo: 'bar',
+      };
+
+      await initComponent({ subscription });
+      expectApiKeyListGet();
+
+      const formsMetadataCard = fixture.nativeElement.querySelector('[data-testId="subscription-forms-metadata-card"]');
+      expect(formsMetadataCard).toBeTruthy();
+      expect(formsMetadataCard.textContent).toContain('Form answers');
+      expect(formsMetadataCard.textContent).toContain('Form: My subscription form');
+      expect(formsMetadataCard.textContent).toContain('question1');
+      expect(formsMetadataCard.textContent).toContain('hello');
+
+      const otherMetadataCard = fixture.nativeElement.querySelector('[data-testId="subscription-other-metadata-card"]');
+      expect(otherMetadataCard).toBeTruthy();
+      expect(otherMetadataCard.textContent).toContain('Subscription metadata');
+      expect(otherMetadataCard.textContent).toContain('foo');
+      expect(otherMetadataCard.textContent).toContain('bar');
+      // Excluded from "other" metadata to avoid duplicates
+      expect(otherMetadataCard.textContent).not.toContain('forms.answer.question1');
+      expect(otherMetadataCard.textContent).not.toContain('forms.name');
+    });
+
     it('should load accepted subscription with consumer status', async () => {
       await initComponent({
         subscription: {

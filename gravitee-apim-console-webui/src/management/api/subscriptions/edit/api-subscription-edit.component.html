@@ -169,6 +169,40 @@
       </mat-card-actions>
     </ng-container>
   </mat-card>
+
+  <mat-card *ngIf="formsMetadataEntries.length > 0" data-testId="subscription-forms-metadata-card">
+    <mat-card-header>
+      <mat-card-title>Form answers</mat-card-title>
+      <mat-card-subtitle *ngIf="formsMetadataFormName">Form: {{ formsMetadataFormName }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <dl class="gio-description-list">
+        <ng-container *ngFor="let entry of formsMetadataEntries">
+          <dt>{{ entry.key }}</dt>
+          <dd>
+            <pre class="subscription__forms-metadata__value">{{ entry.value }}</pre>
+          </dd>
+        </ng-container>
+      </dl>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="otherMetadataEntries.length > 0" data-testId="subscription-other-metadata-card">
+    <mat-card-header>
+      <mat-card-title>Subscription metadata</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <dl class="gio-description-list">
+        <ng-container *ngFor="let entry of otherMetadataEntries">
+          <dt>{{ entry.key }}</dt>
+          <dd>
+            <pre class="subscription__forms-metadata__value">{{ entry.value }}</pre>
+          </dd>
+        </ng-container>
+      </dl>
+    </mat-card-content>
+  </mat-card>
+
   <mat-card
     *ngIf="
       apiKeys?.length > 0 &&

@@ -49,7 +49,9 @@ import { ApplicationService } from '../../../services/application.service';
 import { ConfigService } from '../../../services/config.service';
 import { PageService } from '../../../services/page.service';
 import { PlanService } from '../../../services/plan.service';
+import { FormsService, PortalNextForm } from '../../../services/forms.service';
 import { SubscriptionService } from '../../../services/subscription.service';
+import { SubscriptionCustomFormData } from '../../../components/subscription/custom-form/subscription-custom-form.component';
 
 export interface ApplicationVM extends Application {
   disabled?: boolean;
@@ -106,6 +108,7 @@ export class SubscribeToApiComponent implements OnInit {
       return !this.consumerConfigurationFormData().isValid;
     } else if (this.currentStep() === 4) {
       return (
+        (this.activeForm() != null && !this.customFormData().isValid) ||
         (this.currentPlan()?.comment_required === true && !this.message()) ||
         (this.showApiKeyModeSelection() && !this.applicationApiKeyMode())
       );
@@ -120,6 +123,8 @@ export class SubscribeToApiComponent implements OnInit {
 
   hasSubscriptionError: boolean = false;
   consumerConfigurationFormData = signal<ConsumerConfigurationFormData>({ value: undefined, isValid: false });
+  customFormData = signal<SubscriptionCustomFormData>({ value: undefined, isValid: true });
+  activeForm = signal<PortalNextForm | null>(null);
 
   private currentApplicationsPage: BehaviorSubject<number> = new BehaviorSubject(1);
   private destroyRef = inject(DestroyRef);
@@ -129,6 +134,7 @@ export class SubscribeToApiComponent implements OnInit {
     private planService: PlanService,
     private applicationService: ApplicationService,
     private subscriptionService: SubscriptionService,
+    private formsService: FormsService,
     private pageService: PageService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -156,10 +162,28 @@ export class SubscribeToApiComponent implements OnInit {
         );
       }),
     );
+
+    this.formsService
+      .getActive()
+      .pipe(
+        catchError(_ => of(null)),
+        tap((form: PortalNextForm | null) => {
+          this.activeForm.set(form);
+          if (!form) {
+            this.customFormData.set({ value: undefined, isValid: true });
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
   }
 
   consumerConfigurationFormChanges(data: ConsumerConfigurationFormData) {
     this.consumerConfigurationFormData.set(data);
+  }
+
+  customFormChanges(data: SubscriptionCustomFormData) {
+    this.customFormData.set(data);
   }
 
   goToNextStep(): void {
@@ -203,11 +227,13 @@ export class SubscribeToApiComponent implements OnInit {
     }
 
     const apiKeyMode = this.applicationApiKeyMode();
+    const metadata = this.serializeFormAnswersToMetadata();
 
     const createSubscription: CreateSubscription = {
       application,
       plan,
       ...this.toConsumerConfiguration(),
+      ...(Object.keys(metadata).length ? { metadata } : {}),
       ...(this.message() ? { request: this.message() } : {}),
       ...(apiKeyMode ? { api_key_mode: apiKeyMode } : {}),
     };
@@ -233,6 +259,29 @@ export class SubscribeToApiComponent implements OnInit {
           this.subscriptionInProgress.set(false);
         },
       });
+  }
+
+  private serializeFormAnswersToMetadata(): Record<string, string> {
+    const activeForm = this.activeForm();
+    const answers = this.customFormData().value;
+    if (!activeForm || !answers) {
+      return {};
+    }
+
+    const metadata: Record<string, string> = {
+      'forms.id': String(activeForm.id),
+      'forms.name': String(activeForm.name),
+    };
+
+    Object.entries(answers).forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        return;
+      }
+      const metaKey = `forms.answer.${key}`;
+      metadata[metaKey] = typeof value === 'string' ? value : JSON.stringify(value);
+    });
+
+    return metadata;
   }
 
   private toConsumerConfiguration(): SubscriptionConsumerConfiguration | Record<string, never> {

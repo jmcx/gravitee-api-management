@@ -35,15 +35,17 @@ import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Set;
 import javax.inject.Singleton;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @Singleton
-@Slf4j
 public class ConsoleAuthenticationResource extends AbstractAuthenticationResource {
+
+    private static final Logger log = LoggerFactory.getLogger(ConsoleAuthenticationResource.class);
 
     private static final String PORTAL_NEXT_VERSION = "next";
     private static final String PORTAL_NEXT_PATH = "/next";

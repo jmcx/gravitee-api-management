@@ -29,6 +29,7 @@ import io.gravitee.rest.api.service.notification.Hook;
 import io.gravitee.rest.api.service.notifiers.WebNotifierService;
 import io.gravitee.rest.api.service.notifiers.impl.WebhookNotifierServiceImpl;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,6 +88,7 @@ public class WebhookNotifierServiceImplTest {
             .id("subsNotifId")
             .reason("subsNotifReason")
             .status("PENDING")
+            .metadata(subscriptionMetadata())
             .build();
         params.put("subscription", subscriptionNotificationTemplateData);
 
@@ -98,7 +100,8 @@ public class WebhookNotifierServiceImplTest {
             "\"application\":{\"id\":\"appNotifTempDataId\",\"name\":\"appNotifTempName\"}," +
             "\"owner\":{\"id\":\"primaryId\",\"username\":\"displayNamePrimary\"}," +
             "\"plan\":{\"id\":\"planNotifId\",\"name\":\"planNotifName\",\"security\":\"API_KEY\"}," +
-            "\"subscription\":{\"id\":\"subsNotifId\",\"status\":\"PENDING\"}}";
+            "\"subscription\":{\"id\":\"subsNotifId\",\"status\":\"PENDING\",\"metadata\":{\"k1\":\"v1\",\"forms.color\":\"#FF0000\",\"forms.multi\":\"[\\\"A\\\",\\\"B\\\"]\"}," +
+            "\"forms\":{\"color\":\"#FF0000\",\"multi\":\"[\\\"A\\\",\\\"B\\\"]\"}}}";
 
         Map<String, String> expectedHeaders = new HashMap<>();
         expectedHeaders.put("X-Gravitee-Event", hook.name());
@@ -134,7 +137,11 @@ public class WebhookNotifierServiceImplTest {
         PlanEntity plan = PlanEntity.builder().id("planId").name("planName").security(PlanSecurityType.API_KEY).build();
         params.put("plan", plan);
 
-        SubscriptionEntity subscription = SubscriptionEntity.builder().id("subsId").status(SubscriptionStatus.ACCEPTED).build();
+        SubscriptionEntity subscription = SubscriptionEntity.builder()
+            .id("subsId")
+            .status(SubscriptionStatus.ACCEPTED)
+            .metadata(subscriptionMetadata())
+            .build();
         params.put("subscription", subscription);
 
         webhookNotifierService.trigger(hook, genericNotificationConfig, params);
@@ -146,12 +153,21 @@ public class WebhookNotifierServiceImplTest {
             "\"application\":{\"id\":\"appId\",\"name\":\"appName\"}," +
             "\"owner\":{\"id\":\"ownerId\",\"username\":\"displayName\"}," +
             "\"plan\":{\"id\":\"planId\",\"name\":\"planName\",\"security\":\"API_KEY\"}," +
-            "\"subscription\":{\"id\":\"subsId\",\"status\":\"ACCEPTED\"}}";
+            "\"subscription\":{\"id\":\"subsId\",\"status\":\"ACCEPTED\",\"metadata\":{\"k1\":\"v1\",\"forms.color\":\"#FF0000\",\"forms.multi\":\"[\\\"A\\\",\\\"B\\\"]\"}," +
+            "\"forms\":{\"color\":\"#FF0000\",\"multi\":\"[\\\"A\\\",\\\"B\\\"]\"}}}";
 
         Map<String, String> expectedHeaders = new HashMap<>();
         expectedHeaders.put("X-Gravitee-Event", hook.name());
         expectedHeaders.put("X-Gravitee-Event-Scope", "API");
 
         verify(webNotifierService).request(HttpMethod.POST, "http://example.com/webhook", expectedHeaders, expectedBody, false);
+    }
+
+    private static Map<String, String> subscriptionMetadata() {
+        LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
+        metadata.put("k1", "v1");
+        metadata.put("forms.color", "#FF0000");
+        metadata.put("forms.multi", "[\"A\",\"B\"]");
+        return metadata;
     }
 }

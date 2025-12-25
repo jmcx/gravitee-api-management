@@ -65,6 +65,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -131,7 +132,12 @@ public class SubscriptionsResource extends AbstractResource {
             if (subscriptionInput.getApiKeyMode() != null) {
                 newSubscriptionEntity.setApiKeyMode(ApiKeyMode.valueOf(subscriptionInput.getApiKeyMode().name()));
             }
-            SubscriptionEntity createdSubscription = subscriptionService.create(executionContext, newSubscriptionEntity);
+            final SubscriptionEntity createdSubscription;
+            try {
+                createdSubscription = subscriptionService.create(executionContext, newSubscriptionEntity);
+            } catch (RuntimeException e) {
+                throw e;
+            }
 
             // For consumer convenience, fetch the keys just after the subscription has been created.
             List<Key> keys = apiKeyService

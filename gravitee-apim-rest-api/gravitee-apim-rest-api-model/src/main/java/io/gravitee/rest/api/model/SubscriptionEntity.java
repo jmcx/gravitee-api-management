@@ -15,6 +15,7 @@
  */
 package io.gravitee.rest.api.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.gravitee.rest.api.model.context.OriginContext;
 import java.util.Date;
@@ -114,6 +115,12 @@ public class SubscriptionEntity {
     private SubscriptionConfigurationEntity configuration;
 
     private Map<String, String> metadata;
+
+    /**
+     * Subscription form answers as a structured JSON object (arrays/objects).
+     * Persisted separately from the legacy {@link #metadata}.
+     */
+    private JsonNode formsAnswers;
 
     private String failureCause;
 

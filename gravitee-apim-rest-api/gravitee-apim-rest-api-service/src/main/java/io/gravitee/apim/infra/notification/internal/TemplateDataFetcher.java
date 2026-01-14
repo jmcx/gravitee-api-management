@@ -244,6 +244,7 @@ public class TemplateDataFetcher {
                         .request(subscription.getRequest())
                         .status(subscription.getStatus().name())
                         .metadata(subscription.getMetadata())
+                        .formsAnswers(subscription.getFormsAnswers())
                         .build()
                 );
         } catch (TechnicalException e) {

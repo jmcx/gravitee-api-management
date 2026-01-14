@@ -15,6 +15,7 @@
  */
 package io.gravitee.rest.api.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Map;
 import lombok.EqualsAndHashCode;
@@ -39,4 +40,10 @@ public class UpdateSubscriptionConfigurationEntity {
     private SubscriptionConfigurationEntity configuration;
 
     private Map<String, String> metadata;
+
+    /**
+     * Subscription form answers as a structured JSON object (arrays/objects).
+     * Persisted separately from the legacy {@link #metadata}.
+     */
+    private JsonNode formsAnswers;
 }

@@ -135,6 +135,13 @@ public class Subscription implements Serializable {
     private Integer daysToExpirationOnLastNotification;
     private String configuration;
     private Map<String, String> metadata;
+    /**
+     * Subscription form answers stored as a JSON object (stringified JSON).
+     *
+     * We intentionally keep the repository model representation as a String to ease storage across backends (JDBC/Mongo),
+     * while higher layers (REST APIs, webhook payloads, UI) can expose it as a typed JSON structure (arrays/objects).
+     */
+    private String formsAnswers;
     private Type type = Type.STANDARD;
 
     private String failureCause;
@@ -170,6 +177,7 @@ public class Subscription implements Serializable {
         this.daysToExpirationOnLastNotification = cloned.daysToExpirationOnLastNotification;
         this.configuration = cloned.configuration;
         this.metadata = cloned.metadata;
+        this.formsAnswers = cloned.formsAnswers;
         this.type = cloned.type;
         this.failureCause = cloned.failureCause;
         this.origin = cloned.origin;

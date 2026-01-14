@@ -5778,6 +5778,10 @@ components:
                     type: object
                     additionalProperties:
                         type: string
+                forms_answers:
+                    description: Subscription form answers as a structured JSON object (arrays/objects).
+                    type: object
+                    additionalProperties: {}
                 configuration:
                     description: Subscription configuration
                     $ref: "#/components/schemas/SubscriptionConfigurationInput"
@@ -5790,6 +5794,10 @@ components:
                     type: object
                     additionalProperties:
                         type: string
+                forms_answers:
+                    description: Subscription form answers as a structured JSON object (arrays/objects).
+                    type: object
+                    additionalProperties: {}
                 configuration:
                     description: Subscription configuration
                     $ref: "#/components/schemas/SubscriptionConfigurationInput"

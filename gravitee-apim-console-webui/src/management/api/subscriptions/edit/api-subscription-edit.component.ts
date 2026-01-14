@@ -85,6 +85,7 @@ interface SubscriptionDetailVM {
   description?: string;
   consumerConfiguration?: SubscriptionConsumerConfiguration;
   metadata?: { [key: string]: string };
+  formsAnswers?: any;
   origin: 'KUBERNETES' | 'MANAGEMENT';
 }
 
@@ -190,8 +191,10 @@ export class ApiSubscriptionEditComponent implements OnInit {
                 !subscription.application.domain || subscription.application.domain === '' ? undefined : subscription.application.domain,
               consumerConfiguration: subscription.consumerConfiguration,
               metadata: subscription.metadata,
+              formsAnswers: (subscription as any).formsAnswers,
             };
             this.applyFormsMetadataPreview(subscription.metadata);
+            this.applyFormsAnswersPreview((subscription as any).formsAnswers);
 
             this.canUseCustomApiKey =
               this.subscription.plan.securityType === 'API_KEY' && this.constants.env?.settings?.plan?.security?.customApiKey?.enabled;
@@ -217,17 +220,29 @@ export class ApiSubscriptionEditComponent implements OnInit {
 
   private applyFormsMetadataPreview(metadata?: { [key: string]: string }) {
     const allEntries = Object.entries(metadata ?? {});
-
-    this.formsMetadataFormName = metadata?.['forms.name'] ?? metadata?.['forms.id'];
-
-    this.formsMetadataEntries = allEntries
-      .filter(([key]) => key.startsWith('forms.answer.'))
-      .map(([key, value]) => ({ key: key.replace('forms.answer.', ''), value: this.prettyPrintMaybeJson(value) }))
-      .sort((a, b) => a.key.localeCompare(b.key));
-
+    // Legacy metadata is kept for non-form subscription metadata only.
     this.otherMetadataEntries = allEntries
-      .filter(([key]) => !key.startsWith('forms.answer.') && key !== 'forms.name' && key !== 'forms.id')
       .map(([key, value]) => ({ key, value: this.prettyPrintMaybeJson(value) }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+  }
+
+  private applyFormsAnswersPreview(formsAnswers?: any) {
+    if (!formsAnswers || typeof formsAnswers !== 'object') {
+      this.formsMetadataFormName = undefined;
+      this.formsMetadataEntries = [];
+      return;
+    }
+
+    // Optional form identification sent by Portal Next under a reserved key.
+    const formName = formsAnswers?.__form?.name ?? formsAnswers?.__form?.id;
+    this.formsMetadataFormName = typeof formName === 'string' ? formName : undefined;
+
+    this.formsMetadataEntries = Object.entries(formsAnswers)
+      .filter(([key]) => key !== '__form')
+      .map(([key, value]) => ({
+        key,
+        value: typeof value === 'string' ? value : JSON.stringify(value, null, 2),
+      }))
       .sort((a, b) => a.key.localeCompare(b.key));
   }
 

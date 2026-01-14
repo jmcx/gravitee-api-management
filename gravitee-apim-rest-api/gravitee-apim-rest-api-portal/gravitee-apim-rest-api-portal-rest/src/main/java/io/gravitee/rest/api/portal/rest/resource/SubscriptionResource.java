@@ -156,6 +156,9 @@ public class SubscriptionResource extends AbstractResource {
         UpdateSubscriptionConfigurationEntity updateSubscriptionConfigurationEntity = new UpdateSubscriptionConfigurationEntity();
         updateSubscriptionConfigurationEntity.setSubscriptionId(subscriptionId);
         updateSubscriptionConfigurationEntity.setMetadata(updateSubscriptionInput.getMetadata());
+        if (updateSubscriptionInput.getFormsAnswers() != null) {
+            updateSubscriptionConfigurationEntity.setFormsAnswers(graviteeMapper.valueToTree(updateSubscriptionInput.getFormsAnswers()));
+        }
         SubscriptionConfigurationInput subscriptionConfigurationInput = updateSubscriptionInput.getConfiguration();
         if (subscriptionConfigurationInput != null) {
             SubscriptionConfigurationEntity subscriptionConfigurationEntity = new SubscriptionConfigurationEntity();

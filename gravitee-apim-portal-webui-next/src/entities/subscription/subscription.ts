@@ -68,6 +68,11 @@ export interface CreateSubscription {
     revision?: number;
   };
   metadata?: Record<string, string>;
+  /**
+   * Subscription form answers as a structured JSON object (arrays/objects).
+   * Stored separately from legacy string metadata.
+   */
+  forms_answers?: Record<string, any>;
   plan: string;
   request?: string;
   configuration?: SubscriptionConsumerConfiguration;

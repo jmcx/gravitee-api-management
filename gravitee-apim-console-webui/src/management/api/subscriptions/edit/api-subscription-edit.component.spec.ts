@@ -169,9 +169,11 @@ describe('ApiSubscriptionEditComponent', () => {
     it('should display both form answers and other metadata without duplicates', async () => {
       const subscription = BASIC_SUBSCRIPTION();
       subscription.metadata = {
-        'forms.name': 'My subscription form',
-        'forms.answer.question1': 'hello',
         foo: 'bar',
+      };
+      (subscription as any).formsAnswers = {
+        __form: { name: 'My subscription form' },
+        question1: 'hello',
       };
 
       await initComponent({ subscription });
@@ -189,9 +191,8 @@ describe('ApiSubscriptionEditComponent', () => {
       expect(otherMetadataCard.textContent).toContain('Subscription metadata');
       expect(otherMetadataCard.textContent).toContain('foo');
       expect(otherMetadataCard.textContent).toContain('bar');
-      // Excluded from "other" metadata to avoid duplicates
-      expect(otherMetadataCard.textContent).not.toContain('forms.answer.question1');
-      expect(otherMetadataCard.textContent).not.toContain('forms.name');
+      // Should not leak forms answers into legacy metadata display.
+      expect(otherMetadataCard.textContent).not.toContain('question1');
     });
 
     it('should load accepted subscription with consumer status', async () => {

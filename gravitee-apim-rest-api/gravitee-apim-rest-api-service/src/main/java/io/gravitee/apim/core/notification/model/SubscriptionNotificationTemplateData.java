@@ -30,4 +30,9 @@ public class SubscriptionNotificationTemplateData {
     private String reason;
     private String status;
     private Map<String, String> metadata;
+    /**
+     * Subscription form answers stored as a JSON object (stringified JSON).
+     * This is exposed to webhook payloads as a structured JSON object.
+     */
+    private String formsAnswers;
 }

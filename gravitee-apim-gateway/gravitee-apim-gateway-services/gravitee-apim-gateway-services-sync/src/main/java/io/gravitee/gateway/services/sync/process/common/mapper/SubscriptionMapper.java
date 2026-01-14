@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SubscriptionMapper {
 
     private final ObjectMapper objectMapper;
+    private static final String FORMS_ANSWERS_METADATA_KEY = "__formsAnswers";
 
     public Subscription to(io.gravitee.repository.management.model.Subscription subscriptionModel) {
         try {
@@ -53,7 +54,15 @@ public class SubscriptionMapper {
                     objectMapper.readValue(subscriptionModel.getConfiguration(), SubscriptionConfiguration.class)
                 );
             }
-            subscription.setMetadata(subscriptionModel.getMetadata());
+            // Keep legacy metadata untouched, but expose typed form answers to gateway EL through a dedicated variable.
+            // We transport the raw JSON string via an internal metadata key at runtime (not exposed via Management/Portal APIs).
+            java.util.Map<String, String> metadata = subscriptionModel.getMetadata() != null
+                ? new java.util.HashMap<>(subscriptionModel.getMetadata())
+                : new java.util.HashMap<>();
+            if (subscriptionModel.getFormsAnswers() != null && !subscriptionModel.getFormsAnswers().isBlank()) {
+                metadata.put(FORMS_ANSWERS_METADATA_KEY, subscriptionModel.getFormsAnswers());
+            }
+            subscription.setMetadata(metadata.isEmpty() ? null : metadata);
             subscription.setEnvironmentId(subscriptionModel.getEnvironmentId());
             return subscription;
         } catch (Exception e) {

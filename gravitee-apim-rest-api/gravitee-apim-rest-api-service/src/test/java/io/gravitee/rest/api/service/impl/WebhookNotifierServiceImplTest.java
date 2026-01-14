@@ -89,6 +89,7 @@ public class WebhookNotifierServiceImplTest {
             .reason("subsNotifReason")
             .status("PENDING")
             .metadata(subscriptionMetadata())
+            .formsAnswers("{\"color\":\"#FF0000\",\"multi\":[\"A\",\"B\"]}")
             .build();
         params.put("subscription", subscriptionNotificationTemplateData);
 
@@ -100,8 +101,8 @@ public class WebhookNotifierServiceImplTest {
             "\"application\":{\"id\":\"appNotifTempDataId\",\"name\":\"appNotifTempName\"}," +
             "\"owner\":{\"id\":\"primaryId\",\"username\":\"displayNamePrimary\"}," +
             "\"plan\":{\"id\":\"planNotifId\",\"name\":\"planNotifName\",\"security\":\"API_KEY\"}," +
-            "\"subscription\":{\"id\":\"subsNotifId\",\"status\":\"PENDING\",\"metadata\":{\"k1\":\"v1\",\"forms.color\":\"#FF0000\",\"forms.multi\":\"[\\\"A\\\",\\\"B\\\"]\"}," +
-            "\"forms\":{\"color\":\"#FF0000\",\"multi\":\"[\\\"A\\\",\\\"B\\\"]\"}}}";
+            "\"subscription\":{\"id\":\"subsNotifId\",\"status\":\"PENDING\",\"metadata\":{\"k1\":\"v1\"}," +
+            "\"formsAnswers\":{\"color\":\"#FF0000\",\"multi\":[\"A\",\"B\"]}}}";
 
         Map<String, String> expectedHeaders = new HashMap<>();
         expectedHeaders.put("X-Gravitee-Event", hook.name());
@@ -141,6 +142,7 @@ public class WebhookNotifierServiceImplTest {
             .id("subsId")
             .status(SubscriptionStatus.ACCEPTED)
             .metadata(subscriptionMetadata())
+            .formsAnswers(readJson("{\"color\":\"#FF0000\",\"multi\":[\"A\",\"B\"]}"))
             .build();
         params.put("subscription", subscription);
 
@@ -153,8 +155,8 @@ public class WebhookNotifierServiceImplTest {
             "\"application\":{\"id\":\"appId\",\"name\":\"appName\"}," +
             "\"owner\":{\"id\":\"ownerId\",\"username\":\"displayName\"}," +
             "\"plan\":{\"id\":\"planId\",\"name\":\"planName\",\"security\":\"API_KEY\"}," +
-            "\"subscription\":{\"id\":\"subsId\",\"status\":\"ACCEPTED\",\"metadata\":{\"k1\":\"v1\",\"forms.color\":\"#FF0000\",\"forms.multi\":\"[\\\"A\\\",\\\"B\\\"]\"}," +
-            "\"forms\":{\"color\":\"#FF0000\",\"multi\":\"[\\\"A\\\",\\\"B\\\"]\"}}}";
+            "\"subscription\":{\"id\":\"subsId\",\"status\":\"ACCEPTED\",\"metadata\":{\"k1\":\"v1\"}," +
+            "\"formsAnswers\":{\"color\":\"#FF0000\",\"multi\":[\"A\",\"B\"]}}}";
 
         Map<String, String> expectedHeaders = new HashMap<>();
         expectedHeaders.put("X-Gravitee-Event", hook.name());
@@ -166,8 +168,14 @@ public class WebhookNotifierServiceImplTest {
     private static Map<String, String> subscriptionMetadata() {
         LinkedHashMap<String, String> metadata = new LinkedHashMap<>();
         metadata.put("k1", "v1");
-        metadata.put("forms.color", "#FF0000");
-        metadata.put("forms.multi", "[\"A\",\"B\"]");
         return metadata;
+    }
+
+    private static com.fasterxml.jackson.databind.JsonNode readJson(String json) {
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper().readTree(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

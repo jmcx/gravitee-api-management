@@ -5327,6 +5327,10 @@ components:
                           description: A list of metadata associated to this subscription.
                           additionalProperties:
                               type: string
+                      formsAnswers:
+                          type: object
+                          description: Subscription form answers as a structured JSON object (arrays/objects).
+                          additionalProperties: {}
                       daysToExpirationOnLastNotification:
                           type: integer
                           format: int32

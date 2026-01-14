@@ -183,11 +183,13 @@ public class WebhookNotifierServiceImpl implements WebhookNotifierService {
             jsonObject.put("id", subscription.getId());
             jsonObject.put("status", subscription.getStatus());
             addSubscriptionMetadata(jsonObject, subscription.getMetadata());
+            addSubscriptionFormsAnswers(jsonObject, subscription.getFormsAnswers() != null ? subscription.getFormsAnswers().toString() : null);
         } else if (dataType == SubscriptionNotificationTemplateData.class) {
             SubscriptionNotificationTemplateData notificationData = (SubscriptionNotificationTemplateData) object;
             jsonObject.put("id", notificationData.getId());
             jsonObject.put("status", notificationData.getStatus());
             addSubscriptionMetadata(jsonObject, notificationData.getMetadata());
+            addSubscriptionFormsAnswers(jsonObject, notificationData.getFormsAnswers());
         }
     }
 
@@ -199,16 +201,16 @@ public class WebhookNotifierServiceImpl implements WebhookNotifierService {
         // Preserve ordering when possible to keep payloads stable (and testable).
         JsonObject metadataJson = new JsonObject(new LinkedHashMap<>(metadata));
         subscriptionJson.put("metadata", metadataJson);
+    }
 
-        JsonObject formsJson = new JsonObject();
-        for (Map.Entry<String, String> entry : metadata.entrySet()) {
-            String key = entry.getKey();
-            if (key != null && key.startsWith("forms.")) {
-                formsJson.put(key.substring("forms.".length()), entry.getValue());
-            }
+    private void addSubscriptionFormsAnswers(JsonObject subscriptionJson, String formsAnswersJson) {
+        if (formsAnswersJson == null || formsAnswersJson.isBlank()) {
+            return;
         }
-        if (!formsJson.isEmpty()) {
-            subscriptionJson.put("forms", formsJson);
+        try {
+            subscriptionJson.put("formsAnswers", new JsonObject(formsAnswersJson));
+        } catch (Exception e) {
+            LOGGER.warn("Unable to parse subscription formsAnswers; ignoring", e);
         }
     }
 }

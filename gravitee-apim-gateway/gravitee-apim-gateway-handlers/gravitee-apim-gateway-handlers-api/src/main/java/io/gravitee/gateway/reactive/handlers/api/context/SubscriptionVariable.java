@@ -15,6 +15,8 @@
  */
 package io.gravitee.gateway.reactive.handlers.api.context;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.gravitee.gateway.api.service.Subscription;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -25,6 +27,9 @@ import lombok.AllArgsConstructor;
  */
 @AllArgsConstructor
 public class SubscriptionVariable {
+
+    private static final String FORMS_ANSWERS_METADATA_KEY = "__formsAnswers";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final Subscription subscription;
 
@@ -38,6 +43,28 @@ public class SubscriptionVariable {
 
     public Map<String, String> getMetadata() {
         return this.subscription.getMetadata();
+    }
+
+    /**
+     * Typed subscription form answers (arrays/objects), usable from policies via Expression Language.
+     *
+     * Example:
+     * - {@code #subscription.formsAnswers['features'].contains('analytics')}
+     */
+    public Map<String, Object> getFormsAnswers() {
+        Map<String, String> metadata = this.subscription.getMetadata();
+        if (metadata == null) {
+            return null;
+        }
+        String raw = metadata.get(FORMS_ANSWERS_METADATA_KEY);
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        try {
+            return OBJECT_MAPPER.readValue(raw, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getApplicationName() {

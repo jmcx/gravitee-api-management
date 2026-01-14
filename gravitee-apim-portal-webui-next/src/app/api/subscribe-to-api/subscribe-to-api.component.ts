@@ -227,13 +227,13 @@ export class SubscribeToApiComponent implements OnInit {
     }
 
     const apiKeyMode = this.applicationApiKeyMode();
-    const metadata = this.serializeFormAnswersToMetadata();
+    const forms_answers = this.serializeFormAnswersToFormsAnswers();
 
     const createSubscription: CreateSubscription = {
       application,
       plan,
       ...this.toConsumerConfiguration(),
-      ...(Object.keys(metadata).length ? { metadata } : {}),
+      ...(forms_answers && Object.keys(forms_answers).length ? { forms_answers } : {}),
       ...(this.message() ? { request: this.message() } : {}),
       ...(apiKeyMode ? { api_key_mode: apiKeyMode } : {}),
     };
@@ -261,27 +261,18 @@ export class SubscribeToApiComponent implements OnInit {
       });
   }
 
-  private serializeFormAnswersToMetadata(): Record<string, string> {
+  private serializeFormAnswersToFormsAnswers(): Record<string, any> | undefined {
     const activeForm = this.activeForm();
     const answers = this.customFormData().value;
     if (!activeForm || !answers) {
-      return {};
+      return undefined;
     }
 
-    const metadata: Record<string, string> = {
-      'forms.id': String(activeForm.id),
-      'forms.name': String(activeForm.name),
+    // Keep form identification alongside answers without relying on legacy string metadata.
+    return {
+      __form: { id: activeForm.id, name: activeForm.name },
+      ...answers,
     };
-
-    Object.entries(answers).forEach(([key, value]) => {
-      if (value === null || value === undefined) {
-        return;
-      }
-      const metaKey = `forms.answer.${key}`;
-      metadata[metaKey] = typeof value === 'string' ? value : JSON.stringify(value);
-    });
-
-    return metadata;
   }
 
   private toConsumerConfiguration(): SubscriptionConsumerConfiguration | Record<string, never> {

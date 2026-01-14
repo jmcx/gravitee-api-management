@@ -137,6 +137,11 @@ public class SubscriptionMongo extends DeprecatedAuditable {
 
     private Map<String, String> metadata;
 
+    /**
+     * Subscription form answers stored as a JSON object (stringified JSON).
+     */
+    private String formsAnswers;
+
     private String failureCause;
 
     /**

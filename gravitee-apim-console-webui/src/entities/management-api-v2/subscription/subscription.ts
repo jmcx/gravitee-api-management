@@ -43,6 +43,10 @@ export interface Subscription {
    */
   metadata?: { [key: string]: string };
   /**
+   * Subscription form answers as a structured JSON object (arrays/objects).
+   */
+  formsAnswers?: any;
+  /**
    * Number of days before the expiration of this subscription when the last pre-expiration notification was sent
    */
   daysToExpirationOnLastNotification?: number;

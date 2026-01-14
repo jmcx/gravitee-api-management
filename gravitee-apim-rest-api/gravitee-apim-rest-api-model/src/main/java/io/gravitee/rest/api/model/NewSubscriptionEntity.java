@@ -47,6 +47,12 @@ public class NewSubscriptionEntity {
 
     private Map<String, String> metadata;
 
+    /**
+     * Subscription form answers as a structured JSON object (arrays/objects).
+     * Persisted separately from the legacy {@link #metadata}.
+     */
+    private JsonNode formsAnswers;
+
     public NewSubscriptionEntity(String plan, String application) {
         this.application = application;
         this.plan = plan;

@@ -172,7 +172,3 @@ flowchart LR
 - serialize answers into `metadata` using the `forms.` prefix
 - stringify non-string values
 - include `metadata` in the POST body sent by `SubscriptionService`.
-
-## Testing strategy
-
-- **Backend**: unit tests for form CRUD, schema validation, active-form invariants, and (if enabled) subscription-validation against active schema.

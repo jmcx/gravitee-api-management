@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4.11.0-add-subscription-forms-answers
+      author: gravitee-team
+      changes:
+        - addColumn:
+            tableName: ${gravitee_prefix}subscriptions
+            columns:
+              - column:
+                  name: forms_answers
+                  type: clob
+                  remarks: "Subscription form answers stored as a JSON object (stringified JSON)."
+                  constraints:
+                    nullable: true
+

@@ -32,7 +32,7 @@ class SubscriptionVariableTest {
         Subscription subscription = new Subscription();
         subscription.setId("id");
         subscription.setType(Subscription.Type.PUSH);
-        subscription.setMetadata(Map.of("key", "value"));
+        subscription.setMetadata(Map.of("key", "value", "__formsAnswers", "{\"features\":[\"analytics\",\"webhooks\"]}"));
         subscription.setApplicationName("applicationName");
         subscription.setClientId("clientId");
         SubscriptionVariable subscriptionVariable = new SubscriptionVariable(subscription);
@@ -42,9 +42,17 @@ class SubscriptionVariableTest {
                 SubscriptionVariable::getId,
                 SubscriptionVariable::getType,
                 SubscriptionVariable::getMetadata,
+                SubscriptionVariable::getFormsAnswers,
                 SubscriptionVariable::getApplicationName,
                 SubscriptionVariable::getClientId
             )
-            .containsExactly("id", Subscription.Type.PUSH, Map.of("key", "value"), "applicationName", "clientId");
+            .containsExactly(
+                "id",
+                Subscription.Type.PUSH,
+                Map.of("key", "value", "__formsAnswers", "{\"features\":[\"analytics\",\"webhooks\"]}"),
+                Map.of("features", java.util.List.of("analytics", "webhooks")),
+                "applicationName",
+                "clientId"
+            );
     }
 }

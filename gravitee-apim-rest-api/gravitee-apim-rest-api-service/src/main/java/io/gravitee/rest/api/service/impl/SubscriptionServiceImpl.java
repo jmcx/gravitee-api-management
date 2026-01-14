@@ -533,6 +533,7 @@ public class SubscriptionServiceImpl extends AbstractService implements Subscrip
             subscription.setClientId(clientId);
             subscription.setClientCertificate(clientCertificate);
             subscription.setMetadata(newSubscriptionEntity.getMetadata());
+            subscription.setFormsAnswers(serializeFormsAnswers(newSubscriptionEntity.getFormsAnswers()));
             subscription.setOrigin(newSubscriptionEntity.getOrigin().name());
 
             setSubscriptionConfig(newSubscriptionEntity.getConfiguration(), subscription);
@@ -717,6 +718,7 @@ public class SubscriptionServiceImpl extends AbstractService implements Subscrip
             subscription.setFailureCause(null);
             setSubscriptionConfig(subscriptionConfigEntity.getConfiguration(), subscription);
             subscription.setMetadata(subscriptionConfigEntity.getMetadata());
+            subscription.setFormsAnswers(serializeFormsAnswers(subscriptionConfigEntity.getFormsAnswers()));
 
             subscription = subscriptionRepository.update(subscription);
 
@@ -1823,9 +1825,34 @@ public class SubscriptionServiceImpl extends AbstractService implements Subscrip
             }
         }
         entity.setMetadata(subscription.getMetadata());
+        entity.setFormsAnswers(deserializeFormsAnswers(subscription.getFormsAnswers()));
         entity.setFailureCause(subscription.getFailureCause());
         entity.setOrigin(subscription.getOrigin());
         return entity;
+    }
+
+    private String serializeFormsAnswers(com.fasterxml.jackson.databind.JsonNode formsAnswers) {
+        if (formsAnswers == null || formsAnswers.isNull()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(formsAnswers);
+        } catch (Exception e) {
+            logger.warn("Unable to serialize subscription formsAnswers; ignoring", e);
+            return null;
+        }
+    }
+
+    private com.fasterxml.jackson.databind.JsonNode deserializeFormsAnswers(String formsAnswers) {
+        if (formsAnswers == null || formsAnswers.isBlank()) {
+            return null;
+        }
+        try {
+            return objectMapper.readTree(formsAnswers);
+        } catch (Exception e) {
+            logger.warn("Unable to parse subscription formsAnswers; returning null", e);
+            return null;
+        }
     }
 
     private void createAudit(
